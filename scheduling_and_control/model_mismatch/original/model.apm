@@ -1,0 +1,20 @@
+Model
+  Parameters
+    u = 0 >= 0 <= 100
+    tau = 1
+    K = 1
+
+    tau2 = 1
+    K2 = 1
+  End Parameters
+
+  Variables
+    x = 0
+    y = 0
+  End Variables
+
+  Equations
+    tau  * $x = -x + K * u
+    tau2 * $y = -y + K2 * u
+  End Equations
+End Model

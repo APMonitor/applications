@@ -1,0 +1,159 @@
+!!!! Fill in linear model by loading sysa.apm
+!!!! Ensure correct steady state starting point above
+!!!! Ensure correct sampling frequency (0.1 hr) or else don't use ARX
+!!!! Tie in production rate (q)
+!!!! Adjust the demand or it can be infeasible
+Constants
+  Tc_ss = 300.0
+  Ca_ss = 0.1
+End Constants
+! remove from sysa.apm, u is a variable
+Variables 
+  u = 0
+  y = 0
+End Variables 
+
+Objects
+ sysa = arx
+End Objects
+
+Connections
+  u = sysa.u
+  y = sysa.y
+End Connections
+
+File sysa.txt
+  1      ! m=number of inputs
+  1      ! p=number of outputs
+  1      ! nu=number of input terms
+  2      ! ny=number of output terms
+End File
+
+! Alpha matrix (ny x p)
+File sysa.alpha.txt 
+  1.901890e+00 
+  -9.174880e-01 
+End File 
+
+! Beta matrix (p x (nu x m))
+File sysa.beta.txt 
+  -7.165000e-05 
+End File 
+
+! Gamma vector (p x 1)
+File sysa.gamma.txt 
+0.000000e+00 
+End File 
+!!!! End Linear ARX model tie-in
+
+Constants
+  n = 3  ! products
+  gap = 0.01
+
+  ! transition points for steps
+  b[1] = 0.12 - gap
+  b[2] = 0.12 + gap
+  b[3] = 0.25 - gap
+  b[4] = 0.25 + gap
+  b[5] = 0.35 - gap
+  b[6] = 0.35 + gap
+  
+  ! step up (+) or down (-)
+  sg[1] = 1
+  sg[2] = -1
+  sg[3] = 1
+  sg[4] = -1
+  sg[5] = 1
+  sg[6] = -1
+  
+  ! magnitude of step function
+  m[1] = 9
+  m[2] = 9
+  m[3] = 11
+  m[4] = 11
+  m[5] = 6
+  m[6] = 6
+  
+  ! demand for each product
+  d_lo[1] = 120
+  d_lo[2] = 130
+  d_lo[3] = 150
+
+  !d_hi[1] = 130
+  !d_hi[2] = 150
+  !d_hi[3] = 170
+    
+Parameters
+  eps = 1e-2
+
+  ! initially just the lower demand
+  d[1:n] = d_lo[1:n]
+
+  ! flowrate
+  q = 10  ! m^3/hr
+  
+  ! manipulated variable (Tc)
+  Tc = Tc_ss >= 270  <= 350
+
+  ! zero everywhere except last point
+  last = 0
+  
+Variables
+  ! CV for the application (Ca in mol/L)
+  Ca = Ca_ss
+
+  ! individual step functions
+  w[1:2*n] = 0 , >= 0 , <= 1
+
+  ! slack variables
+  ! should be positive when Ca - b is negative
+  s1[1:2*n] = 0 , >= 0 , <= 100
+  ! should be positive when Ca - b is positive
+  s2[1:2*n] = 0 , >= 0 , <= 100
+
+  ! profit function
+  pfcn >= 0 , <= 27   ! improve convergence with limits
+
+  ! total profit at each time step
+  profit = 0
+  
+  ! which product is being produced
+  prod[1:n] = 0
+
+  ! integral of product
+  iprod[1:n] = 0
+  
+Intermediates
+  ! sum steps
+  z[0] = 0
+  z[1:2*n] = z[0:2*n-1] + sg[1:2*n] * m[1:2*n] * w[1:2*n]
+  
+Equations
+  ! MV (Cooling temperature)
+  Tc = u + Tc_ss
+  ! CV for the application (Ca in mol/L)
+  Ca = y + Ca_ss
+
+  ! profit function
+  pfcn = z[2*n]
+
+  profit = pfcn * q
+
+  prod[1] = w[1] - w[2]
+  prod[2] = w[3] - w[4]
+  prod[3] = w[5] - w[6]  
+  
+  $iprod[1:n] = prod[1:n] * q
+  
+  Ca - b[1:2*n] =  s2[1:2*n] - s1[1:2*n]
+
+  last * (iprod[1:n] - d[1:n]) >= 0
+
+  s1[1:2*n]*(w[1:2*n]) <= eps
+  s2[1:2*n]*(1-w[1:2*n]) <= eps
+    
+  minimize 100 * s1[1:2*n]*(w[1:2*n])
+  minimize 100 * s2[1:2*n]*(1-w[1:2*n])
+  
+  maximize profit
+  
