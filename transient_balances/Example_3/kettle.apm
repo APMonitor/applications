@@ -1,0 +1,10 @@
+Parameters
+  m = 3 ! kg
+  Cp = 4.18 ! kJ/kg-K
+  Q = 0 ! kJ/sec (see kettle.csv)
+  
+Variables
+  T = 18 ! degC
+  
+Equations
+  m * Cp * $T = Q

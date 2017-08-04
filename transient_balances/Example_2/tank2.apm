@@ -1,0 +1,9 @@
+Parameters
+  mout = 5
+  ms = 100
+
+Variables
+  xsalt = 4
+  
+Equations
+  ms * $xsalt = -xsalt * mout
