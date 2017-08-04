@@ -1,0 +1,12 @@
+Parameters
+  rho = 1000
+  g = 9.81
+  sg = 0.9
+  Cv = 0.05
+  pi = 3.1415
+  
+Variables
+  h = 10
+  
+Equations
+  pi * h^2 * $h = -Cv * sqrt(rho*g/sg)*h^(1/2)
