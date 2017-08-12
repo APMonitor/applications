@@ -1,0 +1,1 @@
+This model has the temperature fixed at the two ends of a rod. The dynamic equations describe the evolution of temperature for the interior region of the rod. This model will need to be modified to make one end of the rod fixed and the other temperature at the end of the rod calculated.

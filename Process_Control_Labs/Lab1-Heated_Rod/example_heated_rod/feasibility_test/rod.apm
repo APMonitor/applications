@@ -1,0 +1,93 @@
+! Heated Rod Control Simulation
+! It is desired to have a controller that can attain the desired temperature within
+!   2 minutes without melting any portion of the rod. The rod is made of steel and 
+!   has a diameter of 3 cm and a length of 10 cm.
+Model
+  Constants
+    seg      = 100                      ! number of segments
+    T_melt   = 1426                     ! melting temperature of H13 steel
+    pi       = 3.14159                  ! pi
+    d        = 3 / 100                  ! rod diameter (m)
+    L        = 10 / 100                 ! rod length (m)
+    L_seg    = L / seg                  ! length of a segment (m)
+    A        = pi * d^2 / 4             ! rod cross-sectional area (m)
+    As       = pi * d * L_seg           ! surface heat transfer area (m^2) 
+    heff     = 5.8                      ! effective heat transfer coeff (accounts for rad and conv) (W/(m^2*K))
+    keff     = 28.6                     ! thermal conductivity in H13 steel (W/m-K)
+    rho      = 7760                     ! density of H13 rod steel (kg/m^3)
+    cp       = 460                      ! heat capacity of H13 steel (J/kg-K)
+    Ts       = 23                       ! temperature of the surroundings (°C)
+    c2k      = 273.15                   ! Celcius to Kelvin
+  End Constants
+
+  Parameters
+    T_heater = 290, < T_melt            ! heater temperature (°C)    
+  End Parameters
+
+  Variables
+    T[1:seg] = 23                       ! temperature of the segments (°C)
+  End Variables
+
+  Intermediates
+    ! intermediate variables are explicitly defined and substituted into the equations section
+    TK_heater = T_heater + c2k          ! heater temperature (K)
+    TK[0] = TK_heater                   ! define segment zero as the heater
+    TK[1:seg] = T[1:seg] + c2k          ! segment temperatures (K)
+    TsK  = Ts + c2k                     ! surrounding temperature (K)
+  End Intermediates
+
+  Equations
+    ! Energy balance for the heated rod (shaft segments)
+    ! accumulation                       =   (heat gained from upper segment) 
+    !                                      - (heat lost to lower segment)
+    !                                      - (heat lost to surroundings)
+    ! Units check
+    ! kg/m^3 * m^2 * m * J/kg-K * K/sec  =    W/m-K   * m^2 *  K / m
+    !                                      -  W/m-K   * m^2 *  K / m
+    !                                      -  W/m^2-K * m^2 *  K
+    !
+    rho * A * L_seg * cp * $T[1:seg-1]   =   keff    * A   * (TK[0:seg-2] - TK[1:seg-1]) / L_seg &
+                                           - keff    * A   * (TK[1:seg-1] - TK[2:seg])   / L_seg &
+                                           - heff    * As  * (TK[1:seg-1] - TsK)
+    
+    ! Energy balance for the heated rod (tip segment)
+    ! accumulation                       =   (heat gained from upper segment) 
+    !                                      - (heat lost to surroundings)
+    ! Units check
+    ! kg/m^3 * m^2 * m * J/kg-K * K/sec  =    W/m-K   * m^2 *  K / m
+    !                                      -  W/m^2-K * m^2 *  K
+    !
+    rho * A * L_seg * cp * $T[seg]       =   keff    * A   * (TK[seg-1] - TK[seg]) / L_seg &
+                                           - heff    * (As + A) * (TK[seg] - TsK)
+  End Equations
+End Model
+
+File *.plt
+  New Trend
+    T_heater
+    T[100]
+  New Trend
+    T_heater
+    T[1]
+    T[2]
+    T[3]
+    T[4]
+    T[5]
+    T[10]
+    T[20]
+    T[30]
+    T[40]
+    T[50]
+    T[60]
+    T[70]
+    T[80]
+    T[90]
+    T[100]
+  New Trend
+    T_heater
+    T[1]
+    T[2]
+    T[3]
+    T[4]
+    T[5]
+End File
