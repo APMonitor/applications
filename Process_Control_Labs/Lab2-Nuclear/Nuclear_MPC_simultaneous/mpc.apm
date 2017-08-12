@@ -1,0 +1,28 @@
+model
+parameters
+	demand = 80
+end parameters
+
+variables
+	SPnuc = 70,>0,<100
+	SPlng = 20,>0,<10
+	SPbat = .5,>0,<1
+	nuc = 0
+	lng = 0
+	bat = 0
+	prod = 0
+end variables
+
+equations
+	1.2*$nuc+nuc = SPnuc
+	.05*$lng+lng = SPlng
+	.001*$bat+bat = SPbat
+	
+	prod = nuc+lng+bat
+
+	!Model
+	minimize (prod-demand)^2
+	minimize lng
+	minimize bat
+end equations
+end model
