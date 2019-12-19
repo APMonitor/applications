@@ -20,11 +20,12 @@ else:       # Python 3+
 
 if ver==2:  # Python 2
 
-    def cmd(server, app, aline):
+    def cmd(server, app, aline, disp=True):
         '''Send a request to the server \n \
            server = address of server \n \
            app      = application name \n \
-           aline  = line to send to server \n'''
+           aline  = line to send to server \n \
+           disp = Print output \n'''
         try:
             # Web-server URL address
             url_base = string.strip(server) + '/online/apm_line.php'
@@ -40,7 +41,8 @@ if ver==2:  # Python 2
                     if not char:
                         break
                     elif char == '\n':
-                        print(line)
+                        if disp: 
+                            print(line)
                         line = ''
                     else:
                         line += char
@@ -145,18 +147,22 @@ if ver==2:  # Python 2
            app      = application name '''
         # Retrieve IP address
         ip = get_ip(server)
-        # Web-server URL address
-        app = app.lower()
-        app.replace(" ","")
-        url = string.strip(server) + '/online/' + ip + '_' + app + '/' + filename
-        f = urllib.urlopen(url)
-        # Send request to web-server
-        file = f.read()
-        # Write the file
-        fh = open(filename,'w')
-        fh.write(file.replace('\r',''))
-        fh.close()
-        return (file)
+        try:
+            # Web-server URL address
+            app = app.lower()
+            app.replace(" ","")
+            url = string.strip(server) + '/online/' + ip + '_' + app + '/' + filename
+            f = urllib.urlopen(url)
+            # Send request to web-server
+            file = f.read()
+            # Write the file
+            fh = open(filename,'w')
+            fh.write(file.replace('\r',''))
+            fh.close()
+            return (file)
+        except:
+            print('Could not retrieve ' + filename + ' from server')
+            return []
 
     def set_option(server,app,name,value):
         '''Load APM option \n \
@@ -304,11 +310,12 @@ if ver==2:  # Python 2
 
 else:       # Python 3+
     
-    def cmd(server,app,aline):
+    def cmd(server,app,aline, disp=True):
         '''Send a request to the server \n \
            server = address of server \n \
            app      = application name \n \
-           aline  = line to send to server \n'''
+           aline  = line to send to server \n \
+           disp = Print output \n'''
         try:
             # Web-server URL address
             url_base = server.strip() + '/online/apm_line.php'
@@ -326,7 +333,8 @@ else:       # Python 3+
                     if not char:
                         break
                     elif char == '\n':
-                        print(line)
+                        if disp:
+                            print(line)
                         line = ''
                     else:
                         line += char
@@ -436,19 +444,24 @@ else:       # Python 3+
            app      = application name '''
         # Retrieve IP address
         ip = get_ip(server)
-        # Web-server URL address
-        app = app.lower()
-        app.replace(" ","")
-        url = server.strip() + '/online/' + ip + '_' + app + '/' + filename
-        f = urllib.request.urlopen(url)
-        # Send request to web-server
-        file = f.read()
-        # Write the file
-        fh = open(filename,'w')
-        en_file = file.decode().replace('\r','')
-        fh.write(en_file)
-        fh.close()
-        return (file)
+        try:
+            # Web-server URL address
+            app = app.lower()
+            app.replace(" ","")
+            url = server.strip() + '/online/' + ip + '_' + app + '/' + filename
+            f = urllib.request.urlopen(url)
+            # Send request to web-server
+            file = f.read()
+            # Write the file
+            fh = open(filename,'w')
+            en_file = file.decode().replace('\r','')
+            fh.write(en_file)
+            fh.close()
+            return (file)
+        except:
+            print('Could not retrieve ' + filename + ' from server')
+            return []
+            
 
     def set_option(server,app,name,value):
         '''Load APM option \n \
@@ -596,13 +609,13 @@ else:       # Python 3+
         response = f.read()
         return response
 
-def solve(app,imode):
+def solve(app,imode,web_option=False):
     '''
      APM Solver for simulation, estimation, and optimization with both
       static (steady-state) and dynamic models. The dynamic modes can solve
       index 2+ DAEs without numerical differentiation.
      
-     y = solve(app,imode)
+     y = solve(app,imode,web_option=False)
     
      Function solve uploads the model file (apm) and optionally
        a data file (csv) with the same name to the web-server and performs
@@ -613,8 +626,9 @@ def solve(app,imode):
                 imode = simulation mode {1..7}
                                    steady-state  dynamic  sequential
                         simulate     1             4        7
-                        estimate     2             5        8 (under dev)
-                        optimize     3             6        9 (under dev)
+                        estimate     2             5        8
+                        optimize     3             6        9
+           web_option = open web-viewer
     
      Output: y.names  = names of all variables
              y.values = tables of values corresponding to y.names
@@ -657,8 +671,7 @@ def solve(app,imode):
     
     # default options
     # use or don't use web viewer
-    web = False
-    if web:
+    if web_option:
         set_option(server,app,'nlc.web',2)
     else:
         set_option(server,app,'nlc.web',0)
@@ -679,7 +692,7 @@ def solve(app,imode):
 
     if status==1:
         # open web viewer if selected
-        if web:
+        if web_option:
             web(server,app)
         # retrieve solution and solution.csv
         z = get_solution(server,app)

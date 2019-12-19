@@ -13,8 +13,10 @@ apm(s,a,'clear all');
 apm_load(s,a,'drilling.apm');
 
 % Global settings
-apm_option(s,a,'nlc.solver',1);
-apm_option(s,a,'nlc.max_iter',30);
+apm_option(s,a,'apm.solver',1);
+apm_option(s,a,'apm.max_iter',200);
+
+apm_option(s,a,'apm.diaglevel',0);
 
 % Adjustable parameters
 apm_info(s,a,'FV','Ro_a_1');
@@ -52,29 +54,27 @@ apm_info(s,a,'CV','rop');
 apm_info(s,a,'CV','q_x');
 
 % Start with a steady state solution
-apm_option(s,a,'nlc.imode',1);
+apm_option(s,a,'apm.imode',1);
 output = apm(s,a,'solve');
 disp('Steady State Solution --------------');
 disp(output);
 
 % Load data file
 csv_load(s,a,'drilling.csv');
-apm_option(s,a,'nlc.csv_read',1);
+apm_option(s,a,'apm.csv_read',1);
 
 disp('Dynamic Optimization Initialization --------------');
 % Solve dynamic optimization problem
-apm_option(s,a,'nlc.imode',7);
-apm_option(s,a,'nlc.nodes',2);
-apm_option(s,a,'nlc.coldstart',0);
-%apm_option(s,a,'nlc.time_shift',0)
+apm_option(s,a,'apm.imode',7);
+apm_option(s,a,'apm.nodes',2);
+apm_option(s,a,'apm.coldstart',0);
+%apm_option(s,a,'apm.time_shift',0)
 output = apm(s,a,'solve');
 apm_get(s,a,'results.csv');
 disp(output);
 
 
 % Manipulated variable tuning
-
-
 
 % MV: q_p
 apm_option(s,a,'q_p.status',1);
@@ -137,10 +137,10 @@ disp('Dynamic Optimization --------------');
 apm(s,a,'clear csv');
 csv_load(s,a,'results.csv');
 %csv_load(s,a,'q_x.csv');
-apm_option(s,a,'nlc.reqctrlmode',3);
-apm_option(s,a,'nlc.timeshift',0);
-apm_option(s,a,'nlc.imode',6);
-apm_option(s,a,'nlc.coldstart',0);
+apm_option(s,a,'apm.reqctrlmode',3);
+apm_option(s,a,'apm.timeshift',0);
+apm_option(s,a,'apm.imode',6);
+apm_option(s,a,'apm.coldstart',0);
 output = apm(s,a,'solve');
 disp(output);
 

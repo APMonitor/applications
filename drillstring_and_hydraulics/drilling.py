@@ -12,8 +12,8 @@ apm(s,a,'clear all')
 apm_load(s,a,'drilling.apm')
 
 # Global settings
-apm_option(s,a,'nlc.solver',1)
-apm_option(s,a,'nlc.max_iter',30)
+apm_option(s,a,'apm.solver',1)
+apm_option(s,a,'apm.max_iter',200)
 
 # Adjustable parameters
 apm_info(s,a,'FV','Ro_a_1')
@@ -49,24 +49,24 @@ apm_info(s,a,'CV','p_a_1')
 apm_info(s,a,'CV','rop')
 
 # Start with a steady state solution
-apm_option(s,a,'nlc.imode',1)
+apm_option(s,a,'apm.imode',1)
 output = apm(s,a,'solve')
-print 'Steady State Solution --------------'
-print output
+print('Steady State Solution --------------')
+print(output)
 
 # Load data file
 csv_load(s,a,'drilling.csv')
-apm_option(s,a,'nlc.csv_read',1)
+apm_option(s,a,'apm.csv_read',1)
 
-print 'Dynamic Optimization Initialization --------------'
+print('Dynamic Optimization Initialization --------------')
 # Solve dynamic optimization problem
-apm_option(s,a,'nlc.imode',7)
-apm_option(s,a,'nlc.nodes',2)
-apm_option(s,a,'nlc.coldstart',0)
-#apm_option(s,a,'nlc.time_shift',0)
+apm_option(s,a,'apm.imode',7)
+apm_option(s,a,'apm.nodes',2)
+apm_option(s,a,'apm.coldstart',0)
+#apm_option(s,a,'apm.time_shift',0)
 output = apm(s,a,'solve')
 apm_get(s,a,'results.csv')
-print output
+print(output)
 
 # Manipulated variable tuning
 # MV: q_p
@@ -118,17 +118,17 @@ apm_option(s,a,'rop.wsplo',10000.0)
 apm_option(s,a,'rop.status',1)
 #apm_option(s,a,'rop.cost',-10.0)
 
-print 'Dynamic Optimization --------------'
+print('Dynamic Optimization --------------')
 # Load in new CSV file
 apm(s,a,'clear csv');
 csv_load(s,a,'results.csv');
-csv_load(s,a,'q_x.csv');
-apm_option(s,a,'nlc.reqctrlmode',3);
-apm_option(s,a,'nlc.timeshift',0);
-apm_option(s,a,'nlc.imode',6);
-apm_option(s,a,'nlc.coldstart',0)
+#csv_load(s,a,'q_x.csv');
+apm_option(s,a,'apm.reqctrlmode',3);
+apm_option(s,a,'apm.timeshift',0);
+apm_option(s,a,'apm.imode',6);
+apm_option(s,a,'apm.coldstart',0)
 output = apm(s,a,'solve')
-print output
+print(output)
 
 y = apm_sol(s,a)
 
@@ -142,4 +142,4 @@ plt.legend(('Choke Pressure','Bit Pressure'))
 plt.xlabel('Time (sec)')
 plt.ylabel('Pressure (bar)')
 plt.savefig('plt_Pressure.png')
-#plt.show()
+plt.show()

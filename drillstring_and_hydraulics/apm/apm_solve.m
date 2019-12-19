@@ -33,7 +33,7 @@ function y = apm_solve(app,imode)
     end
     
     % server and application file names
-    server = 'http://xps.apmonitor.com';
+    server = 'http://byu.apmonitor.com';
     app_model = [app '.apm'];
     app_data = [app '.csv'];
 

@@ -23,6 +23,11 @@ url = [deblank(server) '/online/' ip '_' app '/results.csv'];
 response = urlread_apm(url);
 % write solution.csv file
 fid = fopen(filename,'w');
+% sometimes we need a slight pause to avoid crashing
+if fid==-1,
+    pause(0.1);
+    fid = fopen(filename,'w');
+end
 fwrite(fid,response);
 fclose(fid);
 % tranfer solution to local array
